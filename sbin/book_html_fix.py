@@ -175,7 +175,7 @@ def write_books_htmls_from_json(source_file, books_metadata=None):
             os.makedirs(dir_path, exist_ok=True)
             if write:
                 book_html = template_book(book_json)
-                with open(page_path,encoding='utf-8',mode= 'w') as file_html:
+                with open(page_path, encoding='utf-8', mode='w') as file_html:
                     file_html.write(book_html)
             if books_metadata is not None:
                 books_metadata[index_key] = book_json_metadata
