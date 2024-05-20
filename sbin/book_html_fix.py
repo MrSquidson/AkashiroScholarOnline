@@ -262,7 +262,7 @@ href="../../../?search=:signee:{signee}">{signee}</a></div>'
 </head><body id="top">
 <header>
 <a href="../../../"><img class="top-logo" src="../../../img/icon.png" alt="Akashiren Scholar Logo" style="float: right" /></a>
-<a class="back-home" href="../../../">Civ Books</a>
+<a class="back-home" href="../../../">Akashiren Scholar</a>
 </header>
 <h1>{title}</h1>
 <div class="book-metadata">
@@ -279,7 +279,7 @@ href="../../../?search=:signee:{signee}">{signee}</a></div>'
 <p>Inspired by the <a href="https://github.com/CivBooks" target="_blank" rel="noopener noreferrer">Civ Books</a>
 project by <a href="https://github.com/Gjum" target="_blank" rel="noopener noreferrer">Gjum</a>.
 </p>
-<a href="#top"><img class="bottom-logo" src="../../../img/icon.png" alt="Civ Books Logo" /></a>
+<a href="#top"><img class="bottom-logo" src="../../../img/icon.png" alt="Akashiren Scholar Logo" /></a>
 </footer>
 <script defer src="../../../book.js"></script>
 </body></html>'''
