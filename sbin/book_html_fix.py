@@ -3,7 +3,7 @@ import os
 import re
 import sys
 import tkinter as tk
-from tkinter import simpledialog, messagebox
+from tkinter import simpledialog, messagebox, filedialog
 
 books_root = 'books'
 
@@ -45,6 +45,12 @@ try:
         blacklist = [re.compile(line.strip().lower()) for line in f]
 except:
     pass
+
+def select_file():
+    root = tk.Tk()
+    root.withdraw()
+    file_paths = filedialog.askopenfilenames(title="Select files", filetypes=(("Book files", "*.json"), ("Any file","*.*")))
+    return file_paths
 
 SERVERS = ["Abexilas", "Rathnir", "Eldham", "Kanahulu"]
 
@@ -358,5 +364,5 @@ def remove_redundant_formatting(in_str):
 
 
 if __name__ == "__main__":
-    source_paths = sys.argv[1:] if len(sys.argv) > 1 else ['/dev/stdin']
+    source_paths = select_file()
     write_books_htmls_from_json_paths(source_paths)
