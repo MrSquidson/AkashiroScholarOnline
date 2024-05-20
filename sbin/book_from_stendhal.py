@@ -24,7 +24,7 @@ import json
 def print_json_book_from_stendhal(fpath, item_origin):
     title = None
     author = None
-    with open(fpath, "r") as file:
+    with open(fpath,encoding='utf-8',mode= "r") as file:
         while True:
             line = file.readline().strip()
             if line == "pages:":
