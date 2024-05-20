@@ -2,7 +2,7 @@ import sys
 import json
 import os
 import tkinter as tk
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 SERVERS = ["Abexilas", "Rathnir", "Eldham", "Kanahulu"]
 

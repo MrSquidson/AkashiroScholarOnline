@@ -5,7 +5,7 @@ import sys
 import tkinter as tk
 from tkinter import simpledialog, messagebox, filedialog
 
-books_root = 'books'
+books_root = os.path.join(os.getcwd(), '..', 'books')
 
 re_word = re.compile(r'[A-Za-z_0-9]+')
 re_mc_name_with_fmt_codes = re.compile(r'[§A-Za-z_0-9]+')
@@ -230,7 +230,7 @@ def template_book(book):
 
   
     description = f'Signed by {signee} on {item_origin}.' \
-        + f" Read {'it' if page_count <= 1 else f'all {page_count} pages'} here and discover more Civ books."
+        + f" Read {'it' if page_count <= 1 else f'all {page_count} pages'} here and discover more through Akashiren Scholar."
 
     head_img = '' if not author_or_signee else \
         f'<a href="https://minecraft-statistic.net/en/player/{author_or_signee}.html" \
@@ -248,7 +248,7 @@ href="../../../?search=:signee:{signee}">{signee}</a></div>'
     return f'''<!DOCTYPE html><html lang="en">
 <head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} - by {author_or_signee} - Civ Books</title>
+    <title>{title} - by {author_or_signee} - Akashiran Scholar</title>
     <link rel="prefetch" href="../../../font/Minecraft-Regular.otf">
     <link rel="prefetch" href="../../../img/page.png">
     <link rel="stylesheet" href="../../../style.css">
@@ -261,7 +261,7 @@ href="../../../?search=:signee:{signee}">{signee}</a></div>'
 	<link rel="shortcut icon" href="../../../img/icon.png">
 </head><body id="top">
 <header>
-<a href="../../../"><img class="top-logo" src="../../../img/icon.png" alt="Civ Books Logo" style="float: right" /></a>
+<a href="../../../"><img class="top-logo" src="../../../img/icon.png" alt="Akashiren Scholar Logo" style="float: right" /></a>
 <a class="back-home" href="../../../">Civ Books</a>
 </header>
 <h1>{title}</h1>
