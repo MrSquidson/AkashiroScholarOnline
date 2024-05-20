@@ -2,6 +2,8 @@ import json
 import os
 import re
 import sys
+import tkinter as tk
+from tkinter import simpledialog, messagebox
 
 books_root = 'books'
 
@@ -13,9 +15,7 @@ re_format_code = re.compile(r'§[0-9a-fA-FklmnorKLMNOR]')
 re_formatting = re.compile(r'§([0-9a-fA-FklmnorKLMNOR])|\n|[^§]+|§')
 re_redundant_format_codes = re.compile(r'(§[0-9a-fA-FklmnorKLMNOR])+§r')
 
-
-generation_order = {k: v for v, k in enumerate(
-    'Original,Copy,Copy of Copy,Tattered'.split(','))}
+generation_order = {k: v for v, k in enumerate('Original,Copy,Copy of Copy,Tattered'.split(','))}
 generation_order.update({v: v for v in range(4)})
 generation_order[None] = 99
 
@@ -46,9 +46,35 @@ try:
 except:
     pass
 
+SERVERS = ["Abexilas", "Rathnir", "Eldham", "Kanahulu"]
+
+def select_server():
+    def on_select(event=None):
+        selected_server = server_var.get()
+        if selected_server:
+            root.quit()
+            root.destroy()
+        else:
+            messagebox.showerror("Error", "Server name cannot be empty.")
+    
+    root = tk.Tk()
+    root.title("Select Server")
+
+    tk.Label(root, text="Please select the server:").pack(pady=10)
+
+    server_var = tk.StringVar(root)
+    server_var.set(SERVERS[0])  # Default value
+
+    server_menu = tk.OptionMenu(root, server_var, *SERVERS)
+    server_menu.pack(pady=10)
+
+    tk.Button(root, text="OK", command=on_select).pack(pady=10)
+
+    root.mainloop()
+
+    return server_var.get()
 
 def write_books_htmls_from_json_paths(source_paths):
-    # f'{safe_origin}/{signee}/{safe_title}'.lower() -> book_json
     index = {}
     index_json_path = f'{books_root}/metadata.json'
     try:
@@ -64,7 +90,6 @@ def write_books_htmls_from_json_paths(source_paths):
     with open(index_json_path, 'w') as f:
         f.write(json.dumps(index, separators=(',', ':')).replace("},", "},\n"))
 
-
 def write_books_htmls_from_json(source_file, books_metadata=None):
     for line_nr, line in enumerate(source_file):
         try:
@@ -73,8 +98,8 @@ def write_books_htmls_from_json(source_file, books_metadata=None):
                 continue
             book_json = json.loads(line)
             if not book_json.get('item_origin'):
-                raise Exception(
-                    f'No item_origin in book. Line {line_nr} {line}')
+                book_json['item_origin'] = select_server()
+
             if not book_json.get('item_title'):
                 print(f'Skipping untitled book at line {line_nr} with {len(book_json["pages"])} pages'
                       + f' in {book_json["item_origin"]}', file=sys.stderr)
@@ -87,15 +112,11 @@ def write_books_htmls_from_json(source_file, books_metadata=None):
 
             signee = book_json.get("signee") or "-unsigned-"
             if not re_mc_name_with_fmt_codes.match(signee):
-                raise Exception(
-                    f'Invalid signee "{signee}" in line {line_nr} {line}')
+                raise Exception(f'Invalid signee "{signee}" in line {line_nr} {line}')
 
-            item_name = (str_from_chat_component(json.loads(book_json.get("item_name")))
-                if book_json.get("item_name") else None)
+            item_name = (str_from_chat_component(json.loads(book_json.get("item_name"))) if book_json.get("item_name") else None)
 
-            safe_title = make_safe_string(
-                item_name if item_name and len(item_name) > 2*len(book_json.get("item_title", ""))
-                else book_json.get("item_title") or "-unsigned-")
+            safe_title = make_safe_string(item_name if item_name and len(item_name) > 2*len(book_json.get("item_title", "")) else book_json.get("item_title") or "-unsigned-")
             safe_origin = make_safe_origin(book_json['item_origin'])
             dir_path = f'{books_root}/{safe_origin}/{signee}'
             page_path = f'{dir_path}/{safe_title}.html'
@@ -116,13 +137,10 @@ def write_books_htmls_from_json(source_file, books_metadata=None):
                 "word_count": len(list(re_word.finditer(' '.join(book_json["clean_pages"])))),
             }
 
-            # TODO check if exists, add suffix, prompt to check manually
-            # TODO if 10 books in a window of 20 trigger an increment, abort
             write = True
             if os.path.isfile(page_path):
                 warn_lines = []
-                warn_lines.append(
-                    f'Name collision at line {line_nr} "{book_json.get("item_title") or "-unsigned-"}"')
+                warn_lines.append(f'Name collision at line {line_nr} "{book_json.get("item_title") or "-unsigned-"}"')
                 write = False
                 if books_metadata is not None:
                     prev = books_metadata[index_key]
@@ -131,22 +149,17 @@ def write_books_htmls_from_json(source_file, books_metadata=None):
                     for k, curr_val in book_json_metadata.items():
                         if curr_val != prev[k]:
                             differing.append(k)
-                            warn_lines.append(
-                                f'  {k}: mine={curr_val} prev={prev[k]}')
+                            warn_lines.append(f'  {k}: mine={curr_val} prev={prev[k]}')
                     if differing == []:
-                        # probably identical TODO compare full contents
                         write = False
                     elif prev['page_count'] < book_json_metadata['page_count']:
-                        # prev is shorter; overwrite
                         write = True
                     elif prev['page_count'] > book_json_metadata['page_count']:
-                        # prev is longer; leave alone
                         write = False
                     elif differing == ['generation']:
                         if generation_order[prev['generation']] > generation_order[book_json_metadata['generation']]:
-                            # prev is worse; overwrite
                             write = True
-                        else:  # prev is better; leave alone
+                        else:
                             write = False
                     else:
                         print(*warn_lines, sep='\n', file=sys.stderr)
@@ -164,33 +177,26 @@ def write_books_htmls_from_json(source_file, books_metadata=None):
             print("Error in line", line_nr, line.strip(), file=sys.stderr)
             raise e
 
-
 def template_page(content, page_nr, page_count):
-    page_nr += 1  # start at 1
+    page_nr += 1
     styled_content = ''
-    # line breaks reset all formatting
-    tags_to_close = 0  # number of </span> to insert at next §r
+    tags_to_close = 0
     for match in re_formatting.finditer(content):
         fullmatch = match.group(0)
         fcode = match.group(1)
         if fullmatch == '§':
-            # stray section sign with wrong format code following; invisible
             styled_content += f'<span class="fmtcode">§</span>'
         elif not fcode and fullmatch != '\n':
-            # content segment
             styled_content += fullmatch
         elif fullmatch == '\n':
-            # newline reset
             styled_content += '</span>' * tags_to_close
             styled_content += '\n'
             tags_to_close = 0
         elif fcode.lower() == 'r':
-            # reset segment
             styled_content += '</span>' * tags_to_close
             styled_content += f'<span class="fmtcode">§{fcode}</span>'
             tags_to_close = 0
         else:
-            # formatting segment
             styled_content += f'<span class="fmt{fcode.lower()}">'
             styled_content += f'<span class="fmtcode">§{fcode}</span>'
             tags_to_close += 1
@@ -201,7 +207,6 @@ Page {page_nr} of {page_count}</a>\
 <div class="page-content">{styled_content}</div>\
 </div>'
 
-
 def template_book(book):
     clean_pages = book['clean_pages']
     page_count = len(clean_pages)
@@ -209,17 +214,15 @@ def template_book(book):
         template_page(clean_page, page_nr, page_count)
         for page_nr, clean_page in enumerate(clean_pages)
     )
-    item_name = (str_from_chat_component(json.loads(book.get("item_name")))
-        if book.get("item_name") else None)
-    title = (item_name
-        if item_name and len(item_name) > 2*len(book.get("item_title", ""))
-        else book.get('item_title') or "-unsigned-")
+    item_name = (str_from_chat_component(json.loads(book.get("item_name"))) if book.get("item_name") else None)
+    title = (item_name if item_name and len(item_name) > 2*len(book.get('item_title', "")) else book.get('item_title') or "-unsigned-")
     signee = book.get('signee') or "-unsigned-"
     content_author = book.get('content_author')
     author_or_signee = content_author or signee
     item_origin = book['item_origin']
     safe_origin = make_safe_origin(item_origin)
 
+  
     description = f'Signed by {signee} on {item_origin}.' \
         + f" Read {'it' if page_count <= 1 else f'all {page_count} pages'} here and discover more Civ books."
 
