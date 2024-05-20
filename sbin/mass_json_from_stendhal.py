@@ -35,7 +35,7 @@ def select_server():
 def print_json_book_from_stendhal(fpath, item_origin):
     title = None
     author = None
-    with open(fpath, "r") as file:
+    with open(fpath,encoding='utf-8', mode="r") as file:
         while True:
             line = file.readline().strip()
             if line == "pages:":
@@ -82,12 +82,12 @@ def main():
 
     # Save the output file in the export directory
     output_filepath = os.path.join(export_directory, "books.json")
-    with open(output_filepath, "w") as outfile:
+    with open(output_filepath,encoding='utf-8',mode= "w") as outfile:
         for book in books:
             json.dump(book, outfile, separators=(',', ':'))
             outfile.write('\n')
     output_filepath = os.path.join(export_directory,".gitignore")
-    with open(output_filepath, "w") as outfile:
+    with open(output_filepath,encoding='utf-8',mode= "w") as outfile:
         outfile.write('*')
 
     print(f"Processed files have been saved to {output_filepath}")

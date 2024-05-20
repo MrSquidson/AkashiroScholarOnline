@@ -41,7 +41,7 @@ color_code_from_name = {
 blacklist = []
 
 try:
-    with open('blacklist.re', 'r') as f:
+    with open('blacklist.re',encoding='utf-8',mode= 'r') as f:
         blacklist = [re.compile(line.strip().lower()) for line in f]
 except:
     pass
@@ -84,16 +84,16 @@ def write_books_htmls_from_json_paths(source_paths):
     index = {}
     index_json_path = f'{books_root}/metadata.json'
     try:
-        with open(index_json_path, 'r') as f:
+        with open(index_json_path,encoding='utf-8',mode= 'r') as f:
             index = json.load(f)
     except Exception as e:
         print(f'Could not read {index_json_path}: {e}', file=sys.stderr)
 
     for path in source_paths:
-        with open(path, 'r') as f:
+        with open(path,encoding='utf-8',mode= 'r') as f:
             write_books_htmls_from_json(f, index)
 
-    with open(index_json_path, 'w') as f:
+    with open(index_json_path,encoding='utf-8',mode= 'w') as f:
         f.write(json.dumps(index, separators=(',', ':')).replace("},", "},\n"))
 
 def write_books_htmls_from_json(source_file, books_metadata=None):
@@ -175,7 +175,7 @@ def write_books_htmls_from_json(source_file, books_metadata=None):
             os.makedirs(dir_path, exist_ok=True)
             if write:
                 book_html = template_book(book_json)
-                with open(page_path, 'w') as file_html:
+                with open(page_path,encoding='utf-8',mode= 'w') as file_html:
                     file_html.write(book_html)
             if books_metadata is not None:
                 books_metadata[index_key] = book_json_metadata
